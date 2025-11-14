@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chemical Compound Search and Visualization System</title>
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+        padding: 20px;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+    }
+    
+    .main-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+    }
+    
+    .content-row{
+        display: flex;
+        gap: 25 px;
+        width: 100%;
+    }
+
+    .visualization-container {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .filter-container {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        padding: 25px;
+    }
+    
+    h1 {
+        text-align: center;
+        margin-bottom: 25px;
+        color: #2c3e50;
+        font-weight: 600;
+        font-size: 2.2rem;
+    }
+    
+    h2 {
+        color: #2c3e50;
+        margin-bottom: 20px;
+        font-weight: 600;
+    }
+    
+    .description {
+        text-align: center;
+        margin-bottom: 25px;
+        color: #7f8c8d;
+        font-size: 1.1rem;
+        line-height: 1.5;
+    }
+    
+    .element-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+    
+    .element-btn {
+        padding: 12px 25px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1.1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .element-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+    }
+    
+    .element-btn.active {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 8px rgba(0,0,0,0.2);
+    }
+    
+    .element-btn.carbon {
+        background: linear-gradient(135deg, #2c3e50, #34495e);
+    }
+    
+    .element-btn.hydrogen {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+    }
+    
+    .element-btn.oxygen {
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+    }
+    
+    .element-btn.nitrogen {
+        background: linear-gradient(135deg, #9b59b6, #8e44ad);
+    }
+    
+    .element-btn .symbol {
+        font-size: 1.3rem;
+        font-weight: 700;
+    }
+    
+    .selected-elements {
+        margin: 25px 0;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #3498db;
+    }
+    
+    .selected-elements h3 {
+        margin-bottom: 12px;
+        color: #2c3e50;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .selected-elements-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .selected-element {
+        background: linear-gradient(135deg, #2ecc71, #27ae60);
+        color: white;
+        padding: 8px 15px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .selected-element .remove {
+        cursor: pointer;
+        font-weight: bold;
+        background: rgba(255,255,255,0.3);
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+    }
+    
+    .search-section {
+        margin: 25px 0;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #9b59b6;
+    }
+    
+    .search-section h3 {
+        margin-bottom: 12px;
+        color: #2c3e50;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .search-box {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+    
+    .search-input {
+        flex: 1;
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+    }
+    
+    .search-input:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    }
+    
+    .clear-search-btn {
+        padding: 10px 15px;
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .clear-search-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .compounds-container {
+        margin-top: 25px;
+    }
+    
+    .compounds-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .compounds-header h3 {
+        color: #2c3e50;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .compounds-count {
+        background-color: #3498db;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+    
+    .compounds-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 12px;
+        max-height: 400px;
+        overflow-y: auto;
+        padding: 10px;
+    }
+    
+    .compound {
+        padding: 15px;
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border-radius: 8px;
+        text-align: center;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        color: #2c3e50;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        border: 1px solid #e9ecef;
+        cursor: pointer;
+    }
+    
+    .compound:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        background: linear-gradient(135deg, #e9ecef, #dee2e6);
+    }
+    
+    .compound.selected {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+        box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+    }
+    
+    .no-compounds {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 40px 20px;
+        color: #7f8c8d;
+        font-size: 1.1rem;
+    }
+    
+    .no-compounds .icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        opacity: 0.5;
+    }
+    
+    .controls {
+        display: flex;
+        gap: 20px;
+        max-width: 100%;
+        margin: 0 auto;
+    }
+    
+    .clear-btn {
+        padding: 10px 25px;
+        background: linear-gradient(135deg, #e74c3c, #c0392b);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .clear-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+    }
+
+    /* Visualization Styles */
+    .visualization-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        margin-top: 30px;
+    }
+    
+    .molecule-info {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .molecule-formula {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    .molecule-hash {
+        font-size: 0.9rem;
+        color: #7f8c8d;
+        font-family: monospace;
+    }
+
+    .results-container {
+        margin-top: 20px;
+    }
+
+    /* Updated: 50/50 layout for coordinates and 3D viewer */
+    .visualization-area {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* 50/50 split */
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .coordinates-panel {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        max-height: 600px;
+        overflow-y: auto;
+    }
+    
+    .coordinates-panel h3 {
+        margin-bottom: 15px;
+        color: #2c3e50;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .coordinates-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .coordinates-table th, .coordinates-table td {
+        padding: 8px 12px;
+        text-align: left;
+        border-bottom: 1px solid #e1e8ed;
+    }
+    
+    .coordinates-table th {
+        background-color: #e9ecef;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    .coordinates-table tr:hover {
+        background-color: #e9ecef;
+    }
+
+    .view3d-container {
+        position: relative;
+        background: #1a1a1a;
+        border-radius: 8px;
+        overflow: hidden;
+        min-height: 500px;
+    }
+    
+    .view3d {
+        width: 100%;
+        height: 100%;
+    }
+
+    .view2d-container {
+        margin-top: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        border: 2px solid #e1e8ed;
+    }
+    
+    .view2d-container h3 {
+        margin-bottom: 15px;
+        color: #2c3e50;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .image-placeholder {
+        border: 2px dashed #bfc9d4;
+        padding: 25px;
+        text-align: center;
+        color: #71808f;
+        border-radius: 10px;
+    }
+    
+    .structure-image {
+        max-width: 100%;
+        max-height: 350px;
+        border-radius: 10px;
+        display: none;
+    }
+
+    .visualization-info {
+        margin-top: 25px;
+        max-width: 100%;
+        background: #e8f4fc;
+        border-left: 4px solid #3498db;
+        border-radius: 8px;
+        padding: 12px 16px;
+        color: #2c3e50;
+        font-size: 0.95rem;
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 40px;
+        color: #7f8c8d;
+        font-size: 1.1rem;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,.1);
+    }
+
+    /* Loading indicator */
+    .loading-indicator {
+        display: none;
+        text-align: center;
+        padding: 20px;
+        color: #3498db;
+    }
+    
+    .loading-spinner {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #3498db;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 10px;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .compound-info {
+        margin-top: 15px;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #9b59b6;
+        font-size: 0.9rem;
+        color: #2c3e50;
+    }
+    
+    .compound-info h4 {
+        margin-bottom: 8px;
+        color: #2c3e50;
+    }
+    
+    .compound-info ul {
+        padding-left: 20px;
+    }
+    
+    .compound-info li {
+        margin-bottom: 5px;
+    }
+
+    /* NEW: JSON Data Table Styles */
+    .json-data-panel {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 20px;
+    }
+    
+    .json-data-panel h3 {
+        margin-bottom: 15px;
+        color: #2c3e50;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .json-data-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .json-data-table th, .json-data-table td {
+        padding: 10px 12px;
+        text-align: left;
+        border-bottom: 1px solid #e1e8ed;
+    }
+    
+    .json-data-table th {
+        background-color: #e9ecef;
+        font-weight: 600;
+        color: #2c3e50;
+        width: 40%;
+    }
+    
+    .json-data-table td {
+        /* font-family: monospace; */
+        font-weight: 500;
+    }
+    
+    .json-data-table tr:hover {
+        background-color: #e9ecef;
+    }
+
+    /* Wider first column */
+    .json-data-table th:first-child,
+    .json-data-table td:first-child {
+      width: 65% !important;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    /* keep header/second column behavior */
+    .json-data-table th:nth-child(2),
+    .json-data-table td:nth-child(2) {
+      width: 35% !important;
+    }
+    /* NEW: Two-column layout for lower section */
+    .data-visualization-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-top: 20px;
+        min-height: 500px;
+    }
+
+    .data-visualization-row .data-column {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        min-height: 500px;
+    }
+
+    /* Ensure individual panels in the lower section also meet the minimum height */
+    .view3d-container,
+    .coordinates-panel,
+    .json-data-panel,
+    .view2d-container {
+        height: 600px;
+    }
+    .data-visualization-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-top: 20px;
+    }
+    
+    .data-column {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    @media (max-width: 1200px) {
+        .visualization-area {
+            grid-template-columns: 1fr;
+        }
+        
+        .coordinates-panel {
+            max-height: 300px;
+        }
+        
+        .data-visualization-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .element-buttons {
+            gap: 10px;
+        }
+        
+        .element-btn {
+            padding: 10px 20px;
+            font-size: 1rem;
+        }
+        
+        .compounds-list {
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        }
+        
+        .visualization-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .filter-container, .visualization-container {
+            padding: 15px;
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+        }
+        
+        .element-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .element-btn {
+            width: 80%;
+        }
+        
+        .compounds-list {
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        }
+        
+        .search-box {
+            flex-direction: column;
+        }
+        
+        .clear-search-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+</head>
+<body>
+    <h1>Chemical Compound Search and Visualization System</h1>
+    <p class="description">
+      For the publication, see
+      <a
+        href="https://en.wikipedia.org/wiki/List_of_monospaced_typefaces"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        arxiv xxxx</a
+      >.
+    </p>
+    <div class="main-container">
+        <!-- Top: Compound Filter -->
+        <div class="filter-container">
+            <h2>Compound Filter</h2>
+            
+            <p class="description">
+                Click element buttons to filter compounds. Only compounds containing the selected elements will be displayed.
+                Click any compound to add it to the search box.
+            </p>
+            
+            <div class="element-buttons">
+                <button class="element-btn carbon" data-element="C">
+                    <span class="symbol">C</span>
+                    <span class="name">Carbon</span>
+                </button>
+                <button class="element-btn hydrogen" data-element="H">
+                    <span class="symbol">H</span>
+                    <span class="name">Hydrogen</span>
+                </button>
+                <button class="element-btn oxygen" data-element="O">
+                    <span class="symbol">O</span>
+                    <span class="name">Oxygen</span>
+                </button>
+                <button class="element-btn nitrogen" data-element="N">
+                    <span class="symbol">N</span>
+                    <span class="name">Nitrogen</span>
+                </button>
+            </div>
+            
+            <div class="selected-elements">
+                <h3>Selected Elements (e.g. C, H)</h3>
+                <div class="selected-elements-list" id="selectedElementsList">
+                    <!-- Selected elements will appear here -->
+                </div>
+            </div>
+            
+            <div class="search-section">
+                <h3>Selected Compound</h3>
+                <div class="search-box">
+                    <input type="text" class="search-input" id="searchInput" placeholder="Click a compound to select..." readonly>
+                    <button class="clear-search-btn" id="clearSearch">
+                        ✕ Clear
+                    </button>
+                </div>
+            </div>
+            
+            <div class="compounds-container">
+                <div class="compounds-header">
+                    <h3>Matching Compounds</h3>
+                    <div class="compounds-count" id="compoundsCount">0 compounds</div>
+                </div>
+                
+                <div class="loading-indicator" id="compoundsLoading">
+                    <div class="loading-spinner"></div>
+                    <div>Loading compounds...</div>
+                </div>
+                
+                <div class="compounds-list" id="compoundsList">
+                    <!-- Filtered compounds will appear here -->
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button class="clear-btn" id="clearSelection">
+                    Clear Selection
+                </button>
+            </div>
+        </div>
+
+        <!-- Bottom: 3D Visualization -->
+        <div class="visualization-container">
+            <h2>3D Molecular Visualization</h2>
+            
+            <div class="loading-indicator" id="visualizationLoading">
+                <div class="loading-spinner"></div>
+                <div>Loading molecular structure...</div>
+            </div>
+            
+            <div class="results-container" id="resultsContainer">
+                <!-- Results will be dynamically inserted here -->
+            </div>
+            
+            <div class="visualization-info" id="info">Ready</div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="compounds.js"></script> 
+    <script src="knownFiles.js"></script>
+    <script>
+
+        let selectedElements = [];
+        let selectedCompound = '';
+
+        function toggleElement(symbol) {
+            const index = selectedElements.indexOf(symbol);
+            
+            if (index === -1) {
+                selectedElements.push(symbol);
+            } else {
+                selectedElements.splice(index, 1);
+            }
+            
+            updateSelectedElementsList();
+            updateCompoundsList();
+            updateElementButtonsVisual();
+        }
+
+        function updateSelectedElementsList() {
+            const selectedElementsList = document.getElementById('selectedElementsList');
+            selectedElementsList.innerHTML = '';
+            
+            if (selectedElements.length === 0) {
+                const emptyMessage = document.createElement('div');
+                emptyMessage.textContent = 'No elements selected';
+                emptyMessage.style.color = '#7f8c8d';
+                emptyMessage.style.fontStyle = 'italic';
+                selectedElementsList.appendChild(emptyMessage);
+                return;
+            }
+            
+            selectedElements.forEach(symbol => {
+                const elementDiv = document.createElement('div');
+                elementDiv.className = 'selected-element';
+                elementDiv.innerHTML = `
+                    ${symbol}
+                    <span class="remove" data-symbol="${symbol}">×</span>
+                `;
+                selectedElementsList.appendChild(elementDiv);
+            });
+            
+            document.querySelectorAll('.selected-element .remove').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const symbol = button.getAttribute('data-symbol');
+                    toggleElement(symbol);
+                });
+            });
+        }
+
+        function updateCompoundsList() {
+            const compoundsList = document.getElementById('compoundsList');
+            const compoundsCount = document.getElementById('compoundsCount');
+            const compoundsLoading = document.getElementById('compoundsLoading');
+            
+            compoundsList.innerHTML = '';
+            compoundsLoading.style.display = 'block';
+            
+            setTimeout(() => {
+                if (selectedElements.length === 0) {
+                    const noCompoundsDiv = document.createElement('div');
+                    noCompoundsDiv.className = 'no-compounds';
+                    noCompoundsDiv.innerHTML = `
+                        <div class="icon">🧪</div>
+                        <div>Select elements to filter compounds</div>
+                    `;
+                    compoundsList.appendChild(noCompoundsDiv);
+                    compoundsCount.textContent = '0 compounds';
+                    compoundsLoading.style.display = 'none';
+                    return;
+                }
+                
+                const filteredCompounds = compounds.filter(compound => {
+                    const elementsInCompound = new Set();
+                    let currentElement = '';
+                    
+                    for (let i = 0; i < compound.length; i++) {
+                        const char = compound[i];
+                        
+                        if (char >= 'A' && char <= 'Z') {
+                            if (currentElement) {
+                                elementsInCompound.add(currentElement);
+                            }
+                            currentElement = char;
+                        } else if (char >= 'a' && char <= 'z') {
+                            currentElement += char;
+                        }
+                    }
+                    
+                    if (currentElement) {
+                        elementsInCompound.add(currentElement);
+                    }
+                    
+                    for (const element of selectedElements) {
+                        if (!elementsInCompound.has(element)) {
+                            return false;
+                        }
+                    }
+                    
+                    for (const element of elementsInCompound) {
+                        if (!selectedElements.includes(element)) {
+                            return false;
+                        }
+                    }
+                    
+                    return true;
+                });
+                
+                if (filteredCompounds.length === 0) {
+                    const noCompoundsDiv = document.createElement('div');
+                    noCompoundsDiv.className = 'no-compounds';
+                    noCompoundsDiv.innerHTML = `
+                        <div class="icon">🔍</div>
+                        <div>No compounds found containing the selected elements</div>
+                    `;
+                    compoundsList.appendChild(noCompoundsDiv);
+                } else {
+                    filteredCompounds.forEach(compound => {
+                        const compoundDiv = document.createElement('div');
+                        compoundDiv.className = 'compound';
+                        if (compound === selectedCompound) {
+                            compoundDiv.classList.add('selected');
+                        }
+                        compoundDiv.textContent = compound;
+                        compoundDiv.addEventListener('click', () => selectCompound(compound));
+                        compoundsList.appendChild(compoundDiv);
+                    });
+                }
+                
+                compoundsCount.textContent = `${filteredCompounds.length} compounds`;
+                compoundsLoading.style.display = 'none';
+            }, 500); // Simulate loading delay
+        }
+
+        function selectCompound(compound) {
+            selectedCompound = compound;
+            document.getElementById('searchInput').value = compound;
+            
+            // Automatically trigger 3D visualization loading
+            loadMolecule(compound);
+            
+            document.querySelectorAll('.compound').forEach(div => {
+                if (div.textContent === compound) {
+                    div.classList.add('selected');
+                } else {
+                    div.classList.remove('selected');
+                }
+            });
+        }
+
+        function clearSelectedCompound() {
+            selectedCompound = '';
+            document.getElementById('searchInput').value = '';
+            
+            document.querySelectorAll('.compound').forEach(div => {
+                div.classList.remove('selected');
+            });
+        }
+
+        function updateElementButtonsVisual() {
+            document.querySelectorAll('.element-btn').forEach(button => {
+                const symbol = button.getAttribute('data-element');
+                if (selectedElements.includes(symbol)) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            });
+        }
+
+        // ========== 3D Visualization Section ==========
+        let currentViewers = new Map();
+
+        function initViewer(containerId) {
+            const container = document.getElementById(containerId);
+            
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a1a1a);
+
+            const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.z = 8;
+
+            const renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.innerHTML = '';
+            container.appendChild(renderer.domElement);
+
+            scene.add(new THREE.AmbientLight(0x404040, 0.6));
+            const l1 = new THREE.DirectionalLight(0xffffff, 0.8); 
+            l1.position.set(1, 1, 1);
+            const l2 = new THREE.DirectionalLight(0xffffff, 0.4); 
+            l2.position.set(-1, -1, -1);
+            scene.add(l1, l2);
+
+            setupMouseControls(renderer, scene, camera);
+
+            const viewer = { scene, camera, renderer, molecules: [] };
+            currentViewers.set(containerId, viewer);
+
+            function animate() {
+                requestAnimationFrame(animate);
+                renderer.render(scene, camera);
+            }
+            animate();
+
+            return viewer;
+        }
+
+        function setupMouseControls(renderer, scene, camera) {
+            let dragging = false;
+            const canvas = renderer.domElement;
+
+            canvas.onmousedown = () => { 
+                dragging = true; 
+                canvas.style.cursor = "grabbing"; 
+            };
+            canvas.onmouseup = () => { 
+                dragging = false; 
+                canvas.style.cursor = "grab"; 
+            };
+            canvas.onmouseleave = () => dragging = false;
+            canvas.onmouseenter = () => canvas.style.cursor = "grab";
+
+            canvas.onmousemove = e => {
+                if (!dragging) return;
+                scene.rotation.y += e.movementX * 0.01;
+                scene.rotation.x += e.movementY * 0.01;
+            };
+
+            canvas.onwheel = e => {
+                camera.position.z += e.deltaY * 0.01;
+                camera.position.z = Math.max(3, Math.min(20, camera.position.z));
+            };
+        }
+
+        async function loadMolecule(compound = null) {
+            const formula = compound || selectedCompound;
+            if (!formula) return;
+
+            document.getElementById('info').textContent = "Searching...";
+            const resultsContainer = document.getElementById('resultsContainer');
+            const visualizationLoading = document.getElementById('visualizationLoading');
+            
+            resultsContainer.innerHTML = '';
+            visualizationLoading.style.display = 'block';
+
+            try {
+                const xyzFiles = await findXYZFiles(formula);
+                
+                if (xyzFiles.length === 0) {
+                    resultsContainer.innerHTML = '<div class="no-results">No matching molecular structures found</div>';
+                    document.getElementById('info').textContent = `❌ No molecular structure found for ${formula}`;
+                    visualizationLoading.style.display = 'none';
+                    return;
+                }
+
+                resultsContainer.innerHTML = '';
+                
+                if (xyzFiles.length === 1) {
+                    document.getElementById('info').textContent = `✅ Found molecular structure for ${formula}`;
+                    await createSingleResultItem(resultsContainer, formula, xyzFiles[0]);
+                } else {
+                    document.getElementById('info').textContent = `✅ Found ${xyzFiles.length} molecular structures for ${formula}`;
+                    for (let i = 0; i < xyzFiles.length; i++) {
+                        const file = xyzFiles[i];
+                        await createMultiResultItem(resultsContainer, formula, file, i);
+                    }
+                }
+
+                visualizationLoading.style.display = 'none';
+
+            } catch (error) {
+                resultsContainer.innerHTML = '<div class="no-results">Error occurred during search</div>';
+                document.getElementById('info').textContent = '❌ Search failed: ' + error.message;
+                visualizationLoading.style.display = 'none';
+            }
+        }
+
+        async function findXYZFiles(formula) {
+            // Use the provided getKnownFilesList function to get file list
+            const knownFiles = await getKnownFilesList();
+            
+            // First try exact match (single file case)
+            const possibleFiles = [`${formula}.xyz`];
+            
+            // Then try to find all matching files
+            const matchingFiles = knownFiles.filter(file => {
+                // Match format: formula_hash.xyz
+                const baseName = file.replace('.xyz', '');
+                const parts = baseName.split('_');
+                return parts[0] === formula;
+            });
+            
+            possibleFiles.push(...matchingFiles);
+            
+            const validFiles = [];
+            
+            // Check if files exist
+            for (const file of possibleFiles) {
+                try {
+                    const response = await fetch(`./structs/${file}`);
+                    if (response.ok) {
+                        validFiles.push(file);
+                    }
+                } catch (error) {
+                    // File doesn't exist, continue to next
+                }
+            }
+            
+            return validFiles;
+        }
+
+        // NEW: Function to load JSON data
+        async function loadJSONData(jsonFileName) {
+            try {
+                const response = await fetch(`./jsons/${jsonFileName}`);
+                if (!response.ok) {
+                    throw new Error('JSON file not found');
+                }
+                const jsonData = await response.json();
+                return jsonData;
+            } catch (error) {
+                console.error(`Failed to load JSON data for ${jsonFileName}:`, error);
+                return null;
+            }
+        }
+
+        // NEW: Function to create JSON data table
+        function createJSONDataTable(containerId, jsonData) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            if (!jsonData || Object.keys(jsonData).length === 0) {
+                container.innerHTML = '<div class="no-results">No property data available</div>';
+                return;
+            }
+            
+            const table = document.createElement('table');
+            table.className = 'json-data-table';
+            
+            const thead = document.createElement('thead');
+            thead.innerHTML = `
+                <tr>
+                    <th>Property</th>
+                    <th>Value</th>
+                </tr>
+            `;
+            table.appendChild(thead);
+            
+            const tbody = document.createElement('tbody');
+            
+            // Define property descriptions for better UX
+            const propertyDescriptions = {
+            uel: "Upper flammability limit (%)",
+            lel: "Lower flammability limit (%)",
+            loc: "Limiting oxygen concentration (%)",
+            "Hf_298K_kJ/mol": "Enthalpy of formation at 298 K (kJ/mol)",
+            };
+            
+        // Only show these properties (if present) and ignore others
+        const allowedKeys = ["uel", "lel", "loc", "Hf_298K_kJ/mol"];
+        const filteredJson = {};
+        allowedKeys.forEach((k) => {
+          if (k in jsonData) filteredJson[k] = jsonData[k];
+        });
+        jsonData = filteredJson;
+
+        Object.entries(jsonData).forEach(([key, value]) => {
+          const row = document.createElement("tr");
+          const displayName = propertyDescriptions[key] || key;
+          row.innerHTML = `
+                    <td>${displayName}</td>
+                    <td>${value}</td>
+                `;
+          tbody.appendChild(row);
+        });
+
+        table.appendChild(tbody);
+        container.appendChild(table);
+        }
+
+        async function createSingleResultItem(container, formula, xyzFile) {
+            const resultId = 'single-result';
+            const viewerId = 'single-viewer';
+            const coordinatesId = 'single-coordinates';
+            const imageId = 'single-image';
+            const placeholderId = 'single-placeholder';
+            const jsonDataId = 'single-json-data';
+            
+            // Extract hash from filename
+            const hash = xyzFile.replace('.xyz', '').split('_')[1] || 'unknown';
+            const jsonFileName = xyzFile.replace('.xyz', '.json');
+
+            const resultHTML = `
+                <div class="visualization-header">
+                    <div class="molecule-info">
+                        <div class="molecule-formula">${formula}</div>
+                        <div class="molecule-hash">${hash}</div>
+                    </div>
+                </div>
+                <div class="visualization-area">
+                    <div class="coordinates-panel">
+                        <h3>Atomic Coordinates (&#8491;)</h3>
+                        <table class="coordinates-table" id="${coordinatesId}">
+                            <thead>
+                                <tr>
+                                    <th>Atom</th>
+                                    <th>X</th>
+                                    <th>Y</th>
+                                    <th>Z</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Coordinates will be dynamically inserted -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="view3d-container">
+                        <div class="view3d" id="${viewerId}">
+                            <div style="color: white; text-align: center;">Loading 3D model...</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="data-visualization-row">
+                    <div class="data-column">
+                        <div class="json-data-panel">
+                            <h3>Chemical Properties</h3>
+                            <div id="${jsonDataId}">
+                                <div class="loading-indicator">
+                                    <div class="loading-spinner"></div>
+                                    <div>Loading property data...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="data-column">
+                        <div class="view2d-container">
+                            <h3>2D Structure</h3>
+                            <div class="image-placeholder" id="${placeholderId}">Loading 2D image...</div>
+                            <img class="structure-image" id="${imageId}" alt="${formula} structure" style="max-height: 100%; max-width: 100%; height: auto; display: block; margin: 0 auto;">
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            container.insertAdjacentHTML('beforeend', resultHTML);
+
+            const viewer = initViewer(viewerId);
+            
+            try {
+                const xyzResponse = await fetch(`./structs/${xyzFile}`);
+                if (!xyzResponse.ok) throw new Error('XYZ file not found');
+                const xyzData = await xyzResponse.text();
+                
+                const atoms = createMolecule(viewer, xyzData);
+                updateCoordinatesTable(coordinatesId, atoms);
+                
+                // Load JSON data
+                const jsonData = await loadJSONData(jsonFileName);
+                createJSONDataTable(jsonDataId, jsonData);
+                
+                // Load 2D image
+                const imageName = xyzFile.replace('.xyz', '.png');
+                await loadImage(imageId, placeholderId, `./images/${imageName}`);
+                
+                // Add compound information
+                addCompoundInfo(container, formula);
+                
+            } catch (error) {
+                console.error(`Failed to load ${xyzFile}:`, error);
+            }
+        }
+
+        async function createMultiResultItem(container, formula, xyzFile, index) {
+            const resultId = `result-${index}`;
+            const viewerId = `viewer-${index}`;
+            const coordinatesId = `coordinates-${index}`;
+            const imageId = `image-${index}`;
+            const placeholderId = `placeholder-${index}`;
+            const jsonDataId = `json-data-${index}`;
+            
+            // Extract hash from filename
+            const hash = xyzFile.replace('.xyz', '').split('_')[1] || 'unknown';
+            const jsonFileName = xyzFile.replace('.xyz', '.json');
+
+            const resultHTML = `
+                <div class="multi-result" id="${resultId}" style="width: 100%; margin: 0 auto;">
+                    <div class="visualization-header">
+                        <div class="molecule-info">
+                            <div class="molecule-formula">${formula} - Structure ${index + 1}</div>
+                            <div class="molecule-hash">${hash}</div>
+                        </div>
+                    </div>
+                    <div class="visualization-area">
+                        <div class="coordinates-panel">
+                            <h3>Atomic Coordinates (&#8491;)</h3>
+                            <table class="coordinates-table" id="${coordinatesId}">
+                                <thead>
+                                    <tr>
+                                        <th>Atom</th>
+                                        <th>X</th>
+                                        <th>Y</th>
+                                        <th>Z</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Coordinates will be dynamically inserted -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="view3d-container">
+                            <div class="view3d" id="${viewerId}">
+                                <div style="color: white; text-align: center;">Loading 3D model...</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="data-visualization-row">
+                        <div class="data-column">
+                            <div class="json-data-panel">
+                                <h3>Chemical Properties</h3>
+                                <div id="${jsonDataId}">
+                                    <div class="loading-indicator">
+                                        <div class="loading-spinner"></div>
+                                        <div>Loading property data...</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="data-column">
+                            <div class="view2d-container">
+                                <h3>2D Structure</h3>
+                                <div class="image-placeholder" id="${placeholderId}">Loading 2D image...</div>
+                                <img class="structure-image" id="${imageId}" alt="${formula} structure" style="max-height: 100%; max-width: 100%; height: auto; display: block; margin: 0 auto;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            container.insertAdjacentHTML('beforeend', resultHTML);
+
+            const viewer = initViewer(viewerId);
+            
+            try {
+                const xyzResponse = await fetch(`./structs/${xyzFile}`);
+                if (!xyzResponse.ok) throw new Error('XYZ file not found');
+                const xyzData = await xyzResponse.text();
+                
+                const atoms = createMolecule(viewer, xyzData);
+                updateCoordinatesTable(coordinatesId, atoms);
+                
+                // Load JSON data
+                const jsonData = await loadJSONData(jsonFileName);
+                createJSONDataTable(jsonDataId, jsonData);
+                
+                // Load 2D image
+                const imageName = xyzFile.replace('.xyz', '.png');
+                await loadImage(imageId, placeholderId, `./images/${imageName}`);
+                
+            } catch (error) {
+                console.error(`Failed to load ${xyzFile}:`, error);
+            }
+        }
+
+        function createMolecule(viewer, data) {
+            viewer.molecules.forEach(obj => viewer.scene.remove(obj));
+            viewer.molecules = [];
+
+            const lines = data.trim().split('\n');
+            const count = parseInt(lines[0]);
+            const atoms = [];
+
+            const color = {
+                C: 0x808080, H: 0xffffff, O: 0xff4444, 
+                N: 0x4444ff, S: 0xffff00, P: 0xff8000, 
+                F: 0x00ff00, CL: 0x00ff00
+            };
+            
+            const size = {
+                C: 0.5, H: 0.3, O: 0.55, N: 0.55, 
+                S: 0.7, P: 0.7, F: 0.45, CL: 0.7
+            };
+
+            for (let i = 2; i < 2 + count; i++) {
+                const parts = lines[i].trim().split(/\s+/);
+                if (parts.length < 4) continue;
+                
+                const [e, x, y, z] = parts;
+                const element = e.toUpperCase();
+                
+                const geometry = new THREE.SphereGeometry(size[element] || 0.4, 24, 24);
+                const material = new THREE.MeshPhongMaterial({ color: color[element] || 0x888888 });
+                const sphere = new THREE.Mesh(geometry, material);
+                
+                sphere.position.set(+x, +y, +z);
+                viewer.scene.add(sphere);
+                viewer.molecules.push(sphere);
+                atoms.push({ element, x: +x, y: +y, z: +z, position: sphere.position, size: size[element] || 0.4 });
+            }
+
+            createBonds(viewer, atoms);
+            centerMolecule(viewer, atoms);
+            
+            return atoms;
+        }
+
+        function createBonds(viewer, atoms) {
+            const material = new THREE.MeshPhongMaterial({ color: 0xcccccc });
+            
+            // Carbon-carbon bond distance threshold
+            const ccBondThreshold = 1.7;
+            // Other bond distance threshold
+            const otherBondThreshold =2;
+            
+            for (let i = 0; i < atoms.length; i++) {
+                for (let j = i + 1; j < atoms.length; j++) {
+                    const distance = atoms[i].position.distanceTo(atoms[j].position);
+                    let threshold = otherBondThreshold;
+                    
+                    // If it's a carbon-carbon bond, use larger threshold
+                    if (atoms[i].element === 'C' && atoms[j].element === 'C') {
+                        threshold = ccBondThreshold;
+                    }
+                    
+                    if (distance < (atoms[i].size + atoms[j].size) * threshold) {
+                        const geometry = new THREE.CylinderGeometry(0.08, 0.08, distance, 12);
+                        const bond = new THREE.Mesh(geometry, material);
+
+                        const center = new THREE.Vector3()
+                            .addVectors(atoms[i].position, atoms[j].position)
+                            .multiplyScalar(0.5);
+                        bond.position.copy(center);
+                        bond.lookAt(atoms[j].position);
+                        bond.rotateX(Math.PI / 2);
+
+                        viewer.scene.add(bond);
+                        viewer.molecules.push(bond);
+                    }
+                }
+            }
+        }
+
+        function centerMolecule(viewer, atoms) {
+            if (atoms.length === 0) return;
+            
+            const box = new THREE.Box3();
+            atoms.forEach(atom => box.expandByPoint(atom.position));
+            
+            const center = box.getCenter(new THREE.Vector3());
+            const size = box.getSize(new THREE.Vector3());
+            const maxDim = Math.max(size.x, size.y, size.z);
+            
+            viewer.camera.position.set(center.x, center.y, center.z + Math.max(maxDim * 2, 6));
+            viewer.camera.lookAt(center);
+        }
+
+        function updateCoordinatesTable(tableId, atoms) {
+            const tableBody = document.getElementById(tableId).querySelector('tbody');
+            tableBody.innerHTML = '';
+            
+            atoms.forEach(atom => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${atom.element}</td>
+                    <td>${atom.x.toFixed(3)}</td>
+                    <td>${atom.y.toFixed(3)}</td>
+                    <td>${atom.z.toFixed(3)}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        async function loadImage(imageId, placeholderId, imageUrl) {
+            return new Promise((resolve, reject) => {
+                const img = document.getElementById(imageId);
+                const placeholder = document.getElementById(placeholderId);
+                
+                img.onload = () => {
+                    placeholder.style.display = "none";
+                    img.style.display = "block";
+                    resolve();
+                };
+                
+                img.onerror = () => {
+                    img.style.display = "none";
+                    placeholder.textContent = "2D image not found";
+                    placeholder.style.display = "block";
+                    reject(new Error('Image loading failed'));
+                };
+                
+                img.src = imageUrl;
+            });
+        }
+
+        // Add compound information
+        function addCompoundInfo(container, formula) {
+            if (compoundInfo[formula]) {
+                const info = compoundInfo[formula];
+                const infoHTML = `
+                    <div class="compound-info">
+                        <h4>${info.name} (${formula})</h4>
+                        <p>${info.description}</p>
+                        <h4>Uses:</h4>
+                        <ul>
+                            ${info.uses.map(use => `<li>${use}</li>`).join('')}
+                        </ul>
+                        <h4>Properties:</h4>
+                        <ul>
+                            ${info.properties.map(prop => `<li>${prop}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', infoHTML);
+            }
+        }
+
+        // ========== Event Listener Initialization ==========
+        document.querySelectorAll('.element-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const symbol = button.getAttribute('data-element');
+                toggleElement(symbol);
+            });
+        });
+
+        document.getElementById('clearSelection').addEventListener('click', () => {
+            selectedElements = [];
+            updateSelectedElementsList();
+            updateCompoundsList();
+            updateElementButtonsVisual();
+        });
+
+        document.getElementById('clearSearch').addEventListener('click', () => {
+            clearSelectedCompound();
+        });
+
+        // Window resize
+        window.onresize = () => {
+            currentViewers.forEach((viewer, containerId) => {
+                const container = document.getElementById(containerId);
+                if (container) {
+                    viewer.camera.aspect = container.clientWidth / container.clientHeight;
+                    viewer.camera.updateProjectionMatrix();
+                    viewer.renderer.setSize(container.clientWidth, container.clientHeight);
+                }
+            });
+        };
+
+        // Page load
+        // window.onload = () => {
+        //     updateSelectedElementsList();
+        //     updateCompoundsList();
+        //     // Default load CH4 molecule
+        //     setTimeout(() => loadMolecule('CH4'), 100);
+        // };
+    </script>
+</body>
+</html>
