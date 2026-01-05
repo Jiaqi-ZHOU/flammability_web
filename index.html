@@ -1129,14 +1129,14 @@
             
             // Define property descriptions for better UX
             const propertyDescriptions = {
-            uel: "Upper flammability limit (%)",
-            lel: "Lower flammability limit (%)",
-            loc: "Limiting oxygen concentration (%)",
+            UFL: "Upper flammability limit (%)",
+            LFL: "Lower flammability limit (%)",
+            LOC: "Limiting oxygen concentration (%)",
             "Hf_298K_kJ/mol": "Enthalpy of formation at 298 K (kJ/mol)",
             };
             
         // Only show these properties (if present) and ignore others
-        const allowedKeys = ["uel", "lel", "loc", "Hf_298K_kJ/mol"];
+        const allowedKeys = ["UFL", "LFL", "LOC", "Hf_298K_kJ/mol"];
         const filteredJson = {};
         allowedKeys.forEach((k) => {
           if (k in jsonData) filteredJson[k] = jsonData[k];
